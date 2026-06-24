@@ -626,6 +626,15 @@
 
     function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
     
     async function startScan() {
       if (isScanning) return;
@@ -666,21 +675,22 @@
       document.getElementById('workingStatNum').textContent = '0';
       document.getElementById('timeoutStatNum').textContent = '0';
 
+      const shuffled = shuffle(SCAN_INVENTORY);
       let completed = 0;
       try {
-        for (let i = 0; i < SCAN_INVENTORY.length; i += BATCH_SIZE) {
+        for (let i = 0; i < shuffled.length; i += BATCH_SIZE) {
           if (slotIndex >= TARGET_SNIS.length) break; 
 
-          const batch = SCAN_INVENTORY.slice(i, i + BATCH_SIZE);
+          const batch = shuffled.slice(i, i + BATCH_SIZE);
           await processInventoryBatch(batch);
           
           completed += batch.length;
-          setProgress((completed / SCAN_INVENTORY.length) * 100);
-          document.getElementById('resultStats').textContent = `${Math.min(completed, SCAN_INVENTORY.length)} / ${SCAN_INVENTORY.length} pool checked`;
+          setProgress((completed / shuffled.length) * 100);
+          document.getElementById('resultStats').textContent = `${Math.min(completed, shuffled.length)} / ${shuffled.length} pool checked`;
           document.getElementById('workingStatNum').textContent = workingCount;
           document.getElementById('timeoutStatNum').textContent = timeoutCount;
           
-          if (i + BATCH_SIZE < SCAN_INVENTORY.length) await sleep(BATCH_DELAY);
+          if (i + BATCH_SIZE < shuffled.length) await sleep(BATCH_DELAY);
         }
       } catch (e) {}
 
