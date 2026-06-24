@@ -540,7 +540,6 @@
 
     
     async function resolveDomain(domain) {
-      
       const apis = [
         `https://dns.alidns.com/resolve?name=${domain}&type=A`, 
         `https://doh.pub/dns-query?name=${domain}&type=A`,     
@@ -552,10 +551,13 @@
       
       for (const url of apis) {
         try {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 3000);
           const res = await fetch(url, {
             headers: { 'Accept': 'application/dns-json' },
-            signal: AbortSignal.timeout(3000)
+            signal: controller.signal
           });
+          clearTimeout(timer);
           if (!res.ok) continue;
           const data = await res.json();
           if (data.Answer) {
@@ -570,7 +572,6 @@
         } catch {}
       }
       
-      y
       const fallbackIPs = [
         '104.18.217.142', '104.18.0.55', '104.18.16.216', '104.17.24.14', 
         '104.19.192.176', '172.65.251.78', '162.159.140.220', '104.16.143.237'
@@ -596,24 +597,27 @@
     
     async function processInventoryBatch(batch) {
       const promises = batch.map(async (domain) => {
-        if (slotIndex >= TARGET_SNIS.length) return; 
-        const ip = await resolveDomain(domain);
-        const ping = await pingDomain(domain);
+        try {
+          if (slotIndex >= TARGET_SNIS.length) return; 
+          const ip = await resolveDomain(domain);
+          const ping = await pingDomain(domain);
 
-        if (ping !== null) {
-          
-          if (slotIndex < TARGET_SNIS.length) {
-            const currentSlot = slotIndex;
-            slotIndex++; 
-            updateRowStatus(currentSlot, 'working');
-            updateRowPing(currentSlot, ping);
-            updateRowIP(currentSlot, ip);
-            makeRowClickable(currentSlot, TARGET_SNIS[currentSlot], ip);
-            
-            workingCount++;
-            setWorkingCount(workingCount);
+          if (ping !== null) {
+            if (slotIndex < TARGET_SNIS.length) {
+              const currentSlot = slotIndex;
+              slotIndex++; 
+              updateRowStatus(currentSlot, 'working');
+              updateRowPing(currentSlot, ping);
+              updateRowIP(currentSlot, ip);
+              makeRowClickable(currentSlot, TARGET_SNIS[currentSlot], ip);
+              
+              workingCount++;
+              setWorkingCount(workingCount);
+            }
+          } else {
+            timeoutCount++;
           }
-        } else {
+        } catch (e) {
           timeoutCount++;
         }
       });
@@ -663,21 +667,24 @@
       document.getElementById('timeoutStatNum').textContent = '0';
 
       let completed = 0;
-      for (let i = 0; i < SCAN_INVENTORY.length; i += BATCH_SIZE) {
-        if (slotIndex >= TARGET_SNIS.length) break; 
+      try {
+        for (let i = 0; i < SCAN_INVENTORY.length; i += BATCH_SIZE) {
+          if (slotIndex >= TARGET_SNIS.length) break; 
 
-        const batch = SCAN_INVENTORY.slice(i, i + BATCH_SIZE);
-        await processInventoryBatch(batch);
-        
-        completed += batch.length;
-        setProgress((completed / SCAN_INVENTORY.length) * 100);
-        document.getElementById('resultStats').textContent = `${Math.min(completed, SCAN_INVENTORY.length)} / ${SCAN_INVENTORY.length} pool checked`;
-        document.getElementById('workingStatNum').textContent = workingCount;
-        document.getElementById('timeoutStatNum').textContent = timeoutCount;
-        
-        if (i + BATCH_SIZE < SCAN_INVENTORY.length) await sleep(BATCH_DELAY);
-      }
+          const batch = SCAN_INVENTORY.slice(i, i + BATCH_SIZE);
+          await processInventoryBatch(batch);
+          
+          completed += batch.length;
+          setProgress((completed / SCAN_INVENTORY.length) * 100);
+          document.getElementById('resultStats').textContent = `${Math.min(completed, SCAN_INVENTORY.length)} / ${SCAN_INVENTORY.length} pool checked`;
+          document.getElementById('workingStatNum').textContent = workingCount;
+          document.getElementById('timeoutStatNum').textContent = timeoutCount;
+          
+          if (i + BATCH_SIZE < SCAN_INVENTORY.length) await sleep(BATCH_DELAY);
+        }
+      } catch (e) {}
 
+      setProgress(100);
       
       for (let s = slotIndex; s < TARGET_SNIS.length; s++) {
         updateRowStatus(s, 'timeout');
