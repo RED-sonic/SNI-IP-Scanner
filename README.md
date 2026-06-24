@@ -56,6 +56,6 @@ This tool is provided for educational and authorized security testing purposes o
 
 ### / SNI IP Scanner v3.1
 
-Copyright (c) 2025 Hamedvpns / pArSa Panel. All rights reserved.
+Copyright (c) 2026 Hamedvpns / pArSa Panel. All rights reserved.
 
 Unauthorized copying, modification, distribution, or reproduction of this software and its source code is strictly prohibited without prior written permission from the author.
