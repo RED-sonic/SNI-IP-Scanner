@@ -46,6 +46,9 @@
       body.light-theme .glass-btn:hover{background:linear-gradient(135deg,rgba(20,20,20,0.95),rgba(40,40,40,0.9));border-color:rgba(0,0,0,0.25)}
     body.light-theme .glass-btn:disabled{background:rgba(0,0,0,0.04);border-color:rgba(0,0,0,0.06);box-shadow:none;color:#aaa!important}
     body.light-theme .glass-btn{color:#fff!important}
+    body.light-theme .glass-btn span{color:#fff!important}
+    body.light-theme #scanBtn{color:#fff!important}
+    body.light-theme #scanBtn span{color:#fff!important}
     body.light-theme .glow-indigo,body.light-theme .glow-violet,body.light-theme .glow-emerald{box-shadow:0 1px 12px rgba(0,0,0,0.06)}
       body.light-theme .header-glow{text-shadow:none;color:#111}
       body.light-theme .progress-glass{background:rgba(0,0,0,0.05)}
@@ -67,7 +70,10 @@
       body.light-theme .glass-btn{background:linear-gradient(135deg,#222,#333);border:1px solid rgba(0,0,0,0.2)}
       body.light-theme .glass-btn:hover{background:linear-gradient(135deg,#111,#222);border-color:rgba(0,0,0,0.3)}
       body.light-theme .glass-btn:disabled{background:#e5e5e5;border-color:rgba(0,0,0,0.08);color:#999!important}
-      body.light-theme .glass-btn{color:#fff}
+      body.light-theme .glass-btn{color:#fff!important}
+      body.light-theme .glass-btn span{color:#fff!important}
+      body.light-theme #scanBtn{color:#fff!important}
+      body.light-theme #scanBtn span{color:#fff!important}
       body.light-theme .glow-indigo,body.light-theme .glow-violet,body.light-theme .glow-emerald{box-shadow:none}
       body.light-theme .header-glow{text-shadow:none;color:#111}
       body.light-theme .progress-glass{background:#e5e5e5}
@@ -682,6 +688,7 @@
       btnScan.disabled = false;
       scanBtnText.textContent = 'Start Scan';
       btnScan.className = 'glass-btn px-6 sm:px-8 py-3 text-sm font-semibold text-white rounded-xl transition-all duration-300 flex-shrink-0 flex items-center gap-2.5';
+      btnScan.style.color = '#fff';
       isScanning = false;
     }
   </script>
